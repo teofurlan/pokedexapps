@@ -1,9 +1,13 @@
 <script lang="ts">
+  import Form from "./lib/Form.svelte";
   import Header from "./lib/Header.svelte";
+  import PokemonList from "./lib/PokemonList.svelte";
 </script>
 
-
-<Header/>
-<main>
-  Hello World!
+<Header />
+<main
+  class="container min-w-full px-20 pt-10 flex flex-col pb-20 bg-black bg-opacity-50"
+>
+  <Form />
+  <PokemonList />
 </main>
