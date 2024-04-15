@@ -1,9 +1,13 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { type Pokemon } from "../../utility/tools";
   import PokemonLi from "./PokemonLi.svelte";
-  let types: Array<string> = ["Grass", "Poison"];
 
-  const getPokemons = fetch("http://localhost:4321/api/pokemon.json")
+  let pokemonList:Pokemon[] = []
+  let page = 0;
+  const getNextPage = () => {
+    page++
+    const getPokemons = fetch(`http://localhost:4321/api/pokemon.json?page=${page}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -12,12 +16,29 @@
     })
     .then((data) => {
       // Creates an array from the json returned by the fetch and orders it from the ascending order
-      let pokemonList: Array<Pokemon> = Array.from(
+      pokemonList = Array.from(
         data.pokemonList as Pokemon[]
       ).sort((a, b) => parseInt(a.id) - parseInt(b.id));
       // Returns the list of pokemons so we can get it in the :then block
-      return pokemonList;
+      pokemonList = pokemonList;
 
+    });
+  }
+  const getPokemons = fetch(
+    `http://localhost:4321/api/pokemon.json?page=${page}`
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // Creates an array from the json returned by the fetch and orders it from the ascending order
+      pokemonList = Array.from(data.pokemonList as Pokemon[]).sort(
+        (a, b) => parseInt(a.id) - parseInt(b.id)
+      );
+      // Returns the list of pokemons so we can get it in the :then block
     });
 </script>
 
@@ -34,11 +55,9 @@
       >Delete</span
     >
   </li>
-  {#await getPokemons then pokemonList}
-    {#each pokemonList as pokemon}
-      <PokemonLi {pokemon} />
-    {/each}
-  {:catch error}
-    <p style="color: red">{error.message}</p>
-  {/await}
+
+  {#each pokemonList as pokemon}
+    <PokemonLi {pokemon} />
+  {/each}
 </ul>
+<button on:click={getNextPage}>Next</button>

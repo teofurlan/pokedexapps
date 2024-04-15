@@ -7,7 +7,8 @@ import {
 
 // Get the pokemons list stored in the db through getPokemonLis. Returns a response with the list in it
 export const GET: APIRoute = async (context) => {
-  const pokemonList = await getPokemonList();
+  const page = parseInt(context.url.searchParams.get('page') ?? '1', 10)
+  const pokemonList = await getPokemonList(page);
   return new Response(JSON.stringify({ pokemonList }), {
     headers: {
       "content-type": "application/json",

@@ -14,8 +14,8 @@ export type Pokemon = {
 };
 
 // Returns all the pokemons in the database
-export const getPokemonList = async (): Promise<Pokemon[]> => {
-  return await db.find({});
+export const getPokemonList = async (page: number): Promise<Pokemon[]> => {
+  return await db.find<Pokemon>({}).skip(5*page).limit(5);
 };
 
 // Takes a pokemon as argument. Returns an object with with couldAdd and property attributes. 
