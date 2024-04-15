@@ -5,9 +5,14 @@
 
   let pokemonList: Pokemon[] = [];
   let page = 0;
+  let amountOfPages: number | null = 0;
 
-  const getPokemonFromServer = (page: number = 0) => {
-    fetch(`http://localhost:4321/api/pokemon.json?page=${page}`)
+  const getPokemonFromServer = (pageIndex: number = 0) => {
+    
+    if (pageIndex < 0 ) {
+      return;
+    }
+    fetch(`http://localhost:4321/api/pokemon.json?page=${pageIndex}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -15,12 +20,12 @@
         return response.json();
       })
       .then((data) => {
+        if (pageIndex >= data.amountOfPages) { return }
         // Creates an array from the json returned by the fetch and orders it from the ascending order
-        pokemonList = Array.from(data.pokemonList as Pokemon[]).sort(
-          (a, b) => parseInt(a.id) - parseInt(b.id)
-        );
+        pokemonList = Array.from(data.pokemonList as Pokemon[])
         // Returns the list of pokemons so we can get it in the :then block
         pokemonList = pokemonList;
+        page = pageIndex
       });
   };
 
@@ -35,14 +40,15 @@
     }
   };
 
+  // Sets the initial page, the one that corresponds to 0
   getPokemonFromServer(page);
 </script>
 
 <ul
-  class="mt-4 border-8 border-violet-700 rounded-lg min-h-64 bg-black bg-opacity-80"
+  class="mt-4 border-8 border-violet-800 rounded-lg min-h-[16.25rem] bg-black bg-opacity-80"
   id="pokemonsList"
 >
-  <li class="flex items-center justify-between p-2 bg-violet-700">
+  <li class="flex items-center justify-between p-2 bg-violet-800">
     <span class="text-lg text-white font-extrabold w-1/4 pl-3">ID</span>
     <span class="text-lg text-white font-extrabold w-1/4 text-left pl-4"
       >Name</span
@@ -58,7 +64,18 @@
     <PokemonLi {pokemon} bgColor={getPokemonColor(pokemon)} />
   {/each}
 </ul>
-<div class="flex gap-3 items-center justify-center">
-  <PagingButton textContent={"<"} action={() => getPokemonFromServer(--page)} />
-  <PagingButton textContent={">"} action={() => getPokemonFromServer(++page)} />
+<div class="flex gap-3 items-center justify-center mt-3">
+  <PagingButton
+    direction={"left"}
+    action={() => getPokemonFromServer(page - 1)}
+  />
+  <div
+    class="flex items-center justify-center text-bold bg-violet-800 w-20 h-10 font-bold text-2xl rounded-md"
+  >
+    {page + 1}
+  </div>
+  <PagingButton
+    direction={"right"}
+    action={() => getPokemonFromServer(page + 1)}
+  />
 </div>
