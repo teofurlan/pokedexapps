@@ -1,16 +1,9 @@
 <script lang="ts">
+  import { fly, slide } from 'svelte/transition';
     import { getTypeColor, type Pokemon } from '../../utility/tools'
   export let pokemon: Pokemon;
-  let bgColor:string
-  if (pokemon.types.length > 1) {
-    bgColor = `background-image: linear-gradient(to right, ${getTypeColor(
-      pokemon.types[0])}, ${getTypeColor(pokemon.types[1])})`
-  } else {
-    // If the pokemon only has one type, then bgColor stores the tailwind class to set the bg of the li with that types color
-    bgColor = `background-color: ${getTypeColor(pokemon.types[0])}`;
-  }
+  export let bgColor:string  
 </script>
-
 <li
   class="flex justify-between items-center h-10 border-b border-slate-700 px-3.5 last-of-type:border-0"
   style="{bgColor};"

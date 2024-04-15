@@ -1,6 +1,7 @@
 <script lang="ts">
   import Form from "./lib/Form/Form.svelte";
   import Header from "./lib/Header.svelte";
+  import PagingButton from "./lib/PagingButton.svelte";
   import PokemonList from "./lib/PokemonList/PokemonList.svelte";
 </script>
 
