@@ -26,23 +26,17 @@ export const getPokemonList = async (page: number): Promise<Pokemon[]> => {
     .limit(5);
 };
 
-// Takes a pokemon as argument. Returns an object with with couldAdd and property attributes.
-// First, checks if a pokemon with the passed pokemon's id already exits in the database, if it does, the return false and the the name of the  property that causes trouble: id. If the id don't exits in the db, then do the same for the name. Cuts the execution in both validations so only if both properties are new in the db, the pokemon is added to the db and couldAdd is returned as true.
+
+// First, checks if a pokemon with the passed pokemon's id already exits in the database, if it does, the returns false for the attribute that was the cause of trouble. If either of the attributes already existed, then adds the pokemon in to the database and return true for both properties, meaning that they were ok.
 export const addPokemon = async (
   pokemon: Pokemon
 ): Promise<{ idWasOk: boolean; nameWasOk: boolean }> => {
   const validation = await checkIfExits(pokemon);
-  // if (validation.id) {
-  //   return { couldAdd: false, property: "id" };
-  // }
-  // if (validation.name) {
-  //   return { couldAdd: false, property: "name" };
-  // }
   if (!validation.id && !validation.name) {
-    // db.insert(pokemon);
+    db.insert(pokemon);
     return { idWasOk: !validation.id, nameWasOk: !validation.name };
   }
-  return { idWasOk: validation.id, nameWasOk: validation.name };
+  return { idWasOk: !validation.id, nameWasOk: !validation.name };
 };
 
 // Removes the pokemon in the db that has the id passed in the parameter

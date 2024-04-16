@@ -1,10 +1,14 @@
 <script lang="ts">
   import { capitalizeFirstLetter } from "../../utility/tools";
-  // import { createEventDispatcher } from "svelte";
-  // const dispatch = createEventDispatcher()
   import IdInput from "./IdInput.svelte";
   import NameInput from "./NameInput.svelte";
   import TypesInput from "./TypesInput.svelte";
+  import { createEventDispatcher } from "svelte";
+  export const dispatch = createEventDispatcher<{
+    addPokemon: null;
+  }>();
+  let idInputValue:string, nameInputValue:string 
+
   // Defines the pokemon type
   type Pokemon = {
     id: string;
@@ -24,7 +28,7 @@
     // Get the values submitted in the form
     const data = new FormData(event.target as HTMLFormElement);
     // Validates the inputs in the client first
-    if (clienSideValidation(data)) {
+    if (clientSideValidation(data)) {
       // Creates a new Pokemon object to pass it to the server
       const pokemon: Pokemon = {
         id: (data.get("id") as string).toString().padStart(4, "0"),
@@ -36,7 +40,7 @@
   };
 
   // Executes a validation based on the inputs' format
-  const clienSideValidation = (data: FormData): boolean => {
+  const clientSideValidation = (data: FormData): boolean => {
     let isCorrect:boolean = true
     if (!data.get("id")) {
       errors.id = "Must have some id";
@@ -62,47 +66,29 @@
       },
       body: JSON.stringify(pokemon),
     });
-    // Stores the answer of the fetch in this varible, if the pokemon could be added to the db, then it will be true. If it couldn't because a pokemon with that id of name already existed, it'll be false
+    // Stores the answer of the fetch in this varible, if the pokemon could be added to the db, then it will be true. If it couldn't because a pokemon with that id or name already existed, it'll be false
     response.json().then((data) => {
       // Check if the new pokemon could be added to the db
-      console.log("id: " + data.validation.idWasOk);
-      console.log("name: " + data.validation.nameWasOk);
       if (data.validation.idWasOk && data.validation.nameWasOk) {
         // Cleans the tags list for the next pokemon to add
         typesTags = [];
-        // Deletes all the tags from the Dom
-        // for (element of tagsElements) {
-        //   element.remove();
-        // }
-        // Empties the inputs
-        // idInput.value = "";
-        // nameInput.value = "";
-        // Creates a new li to put the pokemon on it and display it in the form
-        // displayNewPokemon(pokemon);
+        // Cleans the inputs' value
+        idInputValue = ''
+        nameInputValue = ''
+        dispatch('addPokemon')
       } else {
         // If the pokemon couldn't be added to the db, then checks if the cause was the id first
-        // if (data.property === "id") {
-        //   // If it was, cleans the ID field in the form
-        //   idInput.value = "";
-        //   // And displays the error message above the field
-        //   const idError = document.getElementById("id-error");
-        //   idError.classList.toggle("hidden");
-        //   idError.getElementsByTagName("span")[0].textContent =
-        //     "This id is already asigned in the database";
-        // } else if (data.property === "name") {
-        //   // If the problem was not the id, it had to be the name, so do the sames process
-        //   nameInput.value = "";
-        //   const nameError = document.getElementById("name-error");
-        //   nameError.getElementsByTagName("span")[0].textContent =
-        //     "This pokemon is already registered in the pokedex";
-        //   nameError.classList.toggle("hidden");
-        // }
+        if (!data.validation.idWasOk) {
+          errors.id = 'This id already exists in the database'
+        }
+        if (!data.validation.nameWasOk) {
+          errors.name = 'This name already exists in the database'
+        }
       }
     });
   };
 
   const deteleTypeFromList = (event: CustomEvent<string>) => {
-    console.log("Pressed type: " + event.detail);
     typesTags = [...typesTags.filter((type) => type !== event.detail)];
   };
 </script>
@@ -113,9 +99,9 @@
     Add a new pokemon
   </h2>
   <!-- Passes the error throw the bind to the IdInput component -->
-  <IdInput bind:error={errors.id} />
+  <IdInput bind:error={errors.id} bind:value={idInputValue}/>
 
-  <NameInput bind:error={errors.name} />
+  <NameInput bind:error={errors.name} bind:value={nameInputValue}/>
 
   <TypesInput
     bind:error={errors.types}

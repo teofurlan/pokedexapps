@@ -1,18 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  // const dispatch = createEventDispatcher();
   export const dispatch = createEventDispatcher<{
     removedTag: string;
   }>();
   import { getTypeColor } from "../../utility/tools";
-
   export let type: string;
-  const removeTag = (event: Event) => {
-    (
-      (event.target as HTMLElement).parentNode as HTMLElement
-    ).parentElement?.remove();
-    dispatch("removedTag", type);
-  };
 </script>
 
 <div
@@ -23,7 +15,7 @@
   <span class="mr-2">{type}</span>
   <button
     class="flex items-center justify-center text-black size-[1.2rem]"
-    on:click={removeTag}
+    on:click|preventDefault={() => dispatch("removedTag", type)}
     ><svg
       xmlns="http://www.w3.org/2000/svg"
       width="20"
