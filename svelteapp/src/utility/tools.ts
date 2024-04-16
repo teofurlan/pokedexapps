@@ -1,4 +1,4 @@
-const typesColors = {
+export const typesColors = {
   Normal: "#A8A77A",
   Fire: "#EE8130",
   Water: "#6390F0",
