@@ -35,6 +35,13 @@
         name: capitalizeFirstLetter(data.get("name") as string),
         types: typesTags,
       };
+      // Resets the errors
+      errors = {
+        id: "",
+        name: "",
+        types: [],
+      };
+      // Calls the function to store the pokemon in the server's db
       addPokemonToDatabase(pokemon);
     }
   };
