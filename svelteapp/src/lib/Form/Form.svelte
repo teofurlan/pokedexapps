@@ -7,7 +7,7 @@
   export const dispatch = createEventDispatcher<{
     addPokemon: null;
   }>();
-  let idInputValue:string, nameInputValue:string 
+  let idInputValue: string, nameInputValue: string;
 
   // Defines the pokemon type
   type Pokemon = {
@@ -41,18 +41,18 @@
 
   // Executes a validation based on the inputs' format
   const clientSideValidation = (data: FormData): boolean => {
-    let isCorrect:boolean = true
+    let isCorrect: boolean = true;
     if (!data.get("id")) {
       errors.id = "Must have some id";
       isCorrect = false;
     }
     if (!data.get("name")) {
       errors.name = "Must have some name";
-      isCorrect = false
+      isCorrect = false;
     }
     if (typesTags.length === 0) {
       errors.types = ["Must have at least one type"];
-      isCorrect = false
+      isCorrect = false;
     }
     return isCorrect;
   };
@@ -73,16 +73,16 @@
         // Cleans the tags list for the next pokemon to add
         typesTags = [];
         // Cleans the inputs' value
-        idInputValue = ''
-        nameInputValue = ''
-        dispatch('addPokemon')
+        idInputValue = "";
+        nameInputValue = "";
+        dispatch("addPokemon");
       } else {
         // If the pokemon couldn't be added to the db, then checks if the cause was the id first
         if (!data.validation.idWasOk) {
-          errors.id = 'This id already exists in the database'
+          errors.id = "This id already exists in the database";
         }
         if (!data.validation.nameWasOk) {
-          errors.name = 'This name already exists in the database'
+          errors.name = "This name already exists in the database";
         }
       }
     });
@@ -99,9 +99,9 @@
     Add a new pokemon
   </h2>
   <!-- Passes the error throw the bind to the IdInput component -->
-  <IdInput bind:error={errors.id} bind:value={idInputValue}/>
+  <IdInput bind:error={errors.id} bind:value={idInputValue} />
 
-  <NameInput bind:error={errors.name} bind:value={nameInputValue}/>
+  <NameInput bind:error={errors.name} bind:value={nameInputValue} />
 
   <TypesInput
     bind:error={errors.types}

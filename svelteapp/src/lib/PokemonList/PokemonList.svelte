@@ -24,7 +24,7 @@
 </script>
 
 <ul
-  class="mt-4 border-8 border-violet-800 rounded-lg min-h-[16.25rem] bg-black bg-opacity-80"
+  class="mt-4 border-8 border-violet-800 rounded-lg min-h-[16.25rem] bg-black bg-opacity-50"
   id="pokemonsList"
 >
   <li
