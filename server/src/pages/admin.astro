@@ -1,0 +1,18 @@
+---
+import { verifyJWT } from "../helpers/jwt";
+import Layout from "../layouts/Layout.astro";
+
+const jwt = Astro.cookies.get("user");
+if (!jwt?.value) {
+  return Astro.redirect("/login");
+}
+// @ts-ignore
+const user: { email: string } = verifyJWT(jwt?.value)
+if (!user) {
+  return Astro.redirect("/login");
+}
+---
+
+<Layout title="Admin">
+  <h1>Admin {user.email}</h1>
+</Layout>

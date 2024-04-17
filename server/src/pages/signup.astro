@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="registro">
+  <form action="/api/users" method="post">
+    <label for="email">Email</label>
+    <input class="border px-2" type="email" id="email" name="email" required>
+    <label for="password">Password</label>
+    <input class="border px-2" type="password" id="password" name="password" required>
+    <button class="bg-blue-600 text-white px-2 py-1" type="submit">Registrarse</button>
+  </form>
+</Layout>
