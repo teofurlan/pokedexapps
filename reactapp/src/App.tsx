@@ -1,13 +1,14 @@
 // import { useEffect, useState } from "react"
 
 import { useEffect } from "react";
+import PokemonLi from "./PokemonLi";
 
-// type Pokemon = {
-//   id: number
-//   name: string
-// }
+type Pokemon = {
+  id: number;
+  name: string;
+};
 
-const BASE_URL = "http://localhost:4321/";
+const BASE_URL = "http://localhost:4321/api/pokemon";
 
 export default function App() {
   // const [list, setList] = useState<Pokemon[]>([])
@@ -107,8 +108,8 @@ export default function App() {
   // </main>
   // )
 
+  const pokemon: Pokemon = { id: 1, name: "Bulbasaur" };
 
-  
   return (
     <div>
       <header className="h-60 flex justify-center items-center bg-black bg-opacity-80">
@@ -130,7 +131,12 @@ export default function App() {
           kedex
         </h1>
       </header>
-      <main></main>
+      <main>
+        <ul>
+          <PokemonLi pokemon={pokemon}/>
+          <PokemonLi pokemon={pokemon}/>
+          </ul>
+      </main>
     </div>
   );
 }
