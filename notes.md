@@ -88,3 +88,12 @@ async function bootstrap() {
   await app.listen(4321);
 }
 ```
+## Data Transfer Object (DTO)
+A DTO is an object that defines how the data will be sent over the network. We can determine the DTO schema by using **Typescript** interfaces, or by simple **classes**. 
+With Nest, classes are recommended because they are part of the **Javascript ES6** standard, therefore, they are preserved as real entities in the compiled Javascript. On the other hand, Typescript interfaces are removed during the transpilation, so Nest can't refer to them at runtime, which is important for some features like **Pipes**.
+For example, in this project we created a `CreatePokemonDTO`
+```typescript
+export class CreatePokemonDTO {
+    
+}
+```
