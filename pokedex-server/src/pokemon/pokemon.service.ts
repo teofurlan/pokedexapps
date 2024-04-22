@@ -1,23 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
+import Datastore from 'nedb-promises';
+
+console.log(Datastore);
+const db = Datastore.create({
+  filename: 'src/pokemon/database/database.db',
+  autoload: true,
+});
 
 @Injectable()
 export class PokemonService {
   create(createPokemonDto: CreatePokemonDto) {
     console.log(createPokemonDto);
-    return 'This action adds a new pokemon';
   }
 
-  getPage(page: number) {
-    console.log(page);
-    return `This is the page ${page} of pokemon`;
+  async getPagesAmount() {
+    return Math.ceil((await db.find({})).length / 5);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pokemon`;
+  async getPage(page: number) {
+    return await db
+      .find({})
+      .sort({ id: 1 })
+      .skip(5 * (page - 1))
+      .limit(5);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+  async remove(id: string) {
+    return db.remove({ id: id }, { multi: false });
   }
 }

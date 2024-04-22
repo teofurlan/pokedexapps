@@ -11,6 +11,11 @@ export class PokemonController {
     return this.pokemonService.create(createPokemonDto);
   }
 
+  @Get()
+  getPagesAmount() {
+    return this.pokemonService.getPagesAmount();
+  }
+
   @Get(':page')
   getPage(@Param('page') page: number) {
     return this.pokemonService.getPage(+page);
@@ -18,6 +23,6 @@ export class PokemonController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.pokemonService.remove(+id);
+    return this.pokemonService.remove(id);
   }
 }

@@ -1,114 +1,135 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // import { useEffect, useState } from "react"
 
-import { useEffect } from "react";
-import PokemonLi from "./PokemonLi";
+import { useEffect, useState } from "react";
+import PokemonLi from "./components/PokemonLi";
+import {
+  Pokemon,
+  capitalizeFirstLetter,
+  getPokemonColor,
+  getTypeColor,
+} from "./utility/types";
+import PagingFooter from "./components/PagingFooter";
+import { Input } from "./components/Input";
+import { TypesInput } from "./components/TypesInput";
 
-type Pokemon = {
-  id: number;
-  name: string;
-};
-
-const BASE_URL = "http://localhost:4321/api/pokemon";
+const BASE_URL = "http://localhost:4321/api/pokemon/";
 
 export default function App() {
-  // const [list, setList] = useState<Pokemon[]>([])
-  // const [page, setPage] = useState(1)
+  const [list, setList] = useState<Pokemon[]>([]);
+  const [pageAmount, setPageAmount] = useState(1);
+  const [page, setPage] = useState<number>(1);
+  const [tagList, setTagList] = useState<Array<string>>([]);
+  const [idError, setIdError] = useState<string>("");
+  const [nameError, setNameError] = useState<string>("");
+  const [typesError, setTypesError] = useState<string>("");
   // const [count, setCount] = useState(0)
   // const pageCount = Math.ceil(count / 5)
+  // setPage(3)
+  // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
+
   useEffect(() => {
-    console.log(BASE_URL);
+    // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
     fetch(BASE_URL)
-      .then((res) => res.text())
-      .then((data) => console.log(data));
-  });
-  // useEffect(() => {
-  //   let cancelled = false
-  //   fetch(`${BASE_URL}/pokemon.json?page=${page}`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       if (!cancelled) {
-  //         setList(data.list)
-  //         setCount(data.count)
-  //       }
-  //     })
+      .then((res) => res.json())
+      .then((data) => setPageAmount(data));
+    fetch(`${BASE_URL}${page}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setList(data);
+      });
+  }, [page]);
 
-  //   return () => {
-  //     cancelled = true
-  //   }
-  // }, [page])
+  // Check if the value that is passed as parameter is between the range of pages, in which case updates the page useState
+  const updatePokemonList = (pageIndex: number) => {
+    if (pageIndex > 0 && pageIndex <= pageAmount) {
+      setPage(pageIndex);
+    }
+  };
 
-  // async function addPokemon(event: React.FormEvent<HTMLFormElement>) {
-  //   event.preventDefault()
+  const addPokemon = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    // Get the information of the form
+    const data = new FormData(form);
+    if (!clientSideValidation(data)) {
+      return;
+    }
+    const pokemon: Pokemon = {
+      id: (data.get("id") as string).toString().padStart(4, "0"),
+      name: capitalizeFirstLetter(data.get("name") as string),
+      types: tagList,
+    };
 
-  //   const form = event.currentTarget
-  //   const data = new FormData(form)
-  //   const pokemon = {
-  //     id: parseInt(data.get('id') as string),
-  //     name: data.get('name') as string
-  //   }
+    fetch(BASE_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify(pokemon),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.validation.idWasOk && data.validation.nameWasOk) {
+          // Cleans the tags list for the next pokemon to add
+          setTagList([]);
+          // Cleans the inputs' value
+          form.reset();
+        } else {
+          // If the pokemon couldn't be added to the db, then checks if the cause was the id first
+          if (!data.validation.idWasOk) {
+            setIdError("This id already exists in the database");
+          }
+          if (!data.validation.nameWasOk) {
+            setNameError("This name already exists in the database");
+          }
+        }
+      });
+  };
 
-  //   await fetch(`${BASE_URL}/pokemon.json`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify(pokemon)
-  //   })
+  const clientSideValidation = (data: FormData): boolean => {
+    let isCorrect: boolean = true;
+    if (!data.get("id")) {
+      setIdError("Must have some id");
+      isCorrect = false;
+    }
+    if (!data.get("name")) {
+      setNameError("Must have some name");
+      isCorrect = false;
+    }
+    if (tagList.length === 0) {
+      setTypesError("Must have at least one type");
+      isCorrect = false;
+    }
+    return isCorrect;
+  };
 
-  //   form.reset()
-  //   if (page === pageCount && list.length < 5) {
-  //     setList(current => [...current, pokemon])
-  //   }
-  //   setCount(current => current + 1)
-  // }
+  const addTag = (event: React.KeyboardEvent) => {
+    if (!(event.key === "Enter")) {
+      return;
+    }
+    event.preventDefault()
+    const type = capitalizeFirstLetter(
+      (event.target as HTMLInputElement).value
+    );
+    if (!getTypeColor(type)) {
+      setTypesError("This is not an existing pokemon's type");
+    } else if (tagList.length === 2) {
+      setTypesError("A pokemon cannot have more than 2 types");
+    } else if (tagList.includes(type)) {
+      setTypesError("This type is already added!");
+    } else {
+      setTagList([...tagList, (event.target as HTMLInputElement).value]);
+      (event.target as HTMLInputElement).value = ''
+    }
+  };
 
-  // async function deletePokemon(id: number) {
-  //   await fetch(`${BASE_URL}/pokemon/${id}.json`, {
-  //     method: 'DELETE'
-  //   })
-
-  //   setList(current => current.filter(pokemon => pokemon.id !== id))
-  //   setCount(current => current - 1)
-
-  //   if (page >= pageCount) {
-  //     setPage(page - 1)
-  //   }
-  // }
-
-  // return (
-  //   <main className="container mx-auto flex flex-col">
-  // 	<h1 className="text-5xl text-red-600 font-extrabold text-center">Pokedex</h1>
-  // 	<form action="/api/pokemon" method="post" onSubmit={addPokemon}>
-  // 		<h2 className="text-2xl text-red-700 font-bold">Agregar nuevo pokemon</h2>
-  // 		<input type="number" name="id" placeholder="ID" className="my-1 w-full p-2 border border-gray-300 rounded-lg" />
-  // 		<input type="text" name="name" placeholder="Name" className="my-1 w-full p-2 border border-gray-300 rounded-lg" />
-  // 		<button type="submit" className="w-full p-2 bg-red-600 text-white rounded-lg mt-2 font-bold uppercase duration-200 hover:bg-red-700">Agregar</button>
-  // 	</form>
-  // 	<ul className="mt-4 border-4 border-red-700">
-  // 		<li className="flex items-center justify-between border-b border-gray-300 p-2 bg-red-700">
-  // 			<span className="text-lg text-white font-extrabold w-1/3">ID</span>
-  // 			<span className="text-lg text-white font-extrabold w-1/3 text-center">Name</span>
-  // 			<span className="text-lg text-white font-extrabold w-1/3 text-right">DELETE</span>
-  // 		</li>
-  // 		{list.map(pokemon => (
-  // 			<li className="flex items-center justify-between border-b border-gray-300 p-2">
-  // 				<span className="text-lg text-red-600 font-bold w-1/3">{pokemon.id}</span>
-  // 				<span className="text-lg text-red-600 font-bold w-1/3 text-center">{pokemon.name}</span>
-  // 				<div className="w-1/3 text-right">
-  // 					<button onClick={() => deletePokemon(pokemon.id)} className="font-bold hover:font-extrabold">X</button>
-  // 				</div>
-  // 			</li>
-  // 		))}
-  // 	</ul>
-  //   <div className="flex justify-center gap-2">
-  //     <button onClick={() => setPage(c => Math.max(1, c - 1))} disabled={page === 1} className="p-2 bg-red-600 text-white rounded-lg mt-2 font-bold uppercase duration-200 disabled:opacity-50 hover:bg-red-700">Prev</button>
-  //     <span className="flex items-center self-stretch">{page}</span>
-  //     <button onClick={() => setPage(c => Math.min(pageCount, c + 1))} disabled={page === pageCount} className="p-2 bg-red-600 text-white rounded-lg mt-2 font-bold uppercase duration-200 disabled:opacity-50 hover:bg-red-700">Next</button>
-  //   </div>
-  // </main>
-  // )
-
-  const pokemon: Pokemon = { id: 1, name: "Bulbasaur" };
+  const deleteTag = (tag: string) => {
+    console.log('Delete tag: '+ tagList)
+    setTagList(tagList.filter((type) => type !== tag) as []);
+  };
 
   return (
     <div>
@@ -131,11 +152,74 @@ export default function App() {
           kedex
         </h1>
       </header>
-      <main>
-        <ul>
-          <PokemonLi pokemon={pokemon}/>
-          <PokemonLi pokemon={pokemon}/>
-          </ul>
+      <main className="container min-w-full px-20 pt-10 flex flex-col pb-20 bg-black bg-opacity-50">
+        <h2 className="text-4xl text-yellow-400 drop-shadow-xl font-bold mb-3">
+          Add a new pokemon
+        </h2>
+        <form onSubmit={addPokemon}>
+          <Input
+            type={"number"}
+            name={"id"}
+            holder={"ID"}
+            error={idError}
+            clearError={() => setIdError("")}
+          />
+          <Input
+            type={"text"}
+            name={"name"}
+            holder={"Name"}
+            error={nameError}
+            clearError={() => setNameError("")}
+          />
+          <TypesInput
+            holder={"Write some type and press enter to add it"}
+            error={typesError}
+            addTag={addTag}
+            deleteTag={deleteTag}
+            typesTags={tagList}
+            clearError={() => setTypesError("")}
+          />
+          <button
+            type="submit"
+            className="w-full p-2 bg-green-400 text-white rounded-lg mt-2 font-bold uppercase duration-200 hover:bg-green-500"
+          >
+            Add
+          </button>
+        </form>
+        <ul
+          className="mt-4 border-8 border-violet-800 rounded-lg min-h-[16.25rem] bg-black bg-opacity-50"
+          id="pokemonList"
+        >
+          <li className="flex items-center justify-between p-2 bg-violet-800 text-yellow-400">
+            <span className="text-lg font-extrabold w-1/4 pl-3">ID</span>
+            <span className="text-lg font-extrabold w-1/4 text-left pl-4">
+              Name
+            </span>
+            <span className="text-lg font-extrabold w-1/4 text-left pl-4">
+              Type/s
+            </span>
+            <span className="text-lg font-extrabold w-1/4 text-right pr-3">
+              Delete
+            </span>
+          </li>
+          {list.map((pokemon) => (
+            <PokemonLi
+              key={pokemon.id}
+              pokemon={pokemon}
+              bgColor={getPokemonColor(pokemon as Pokemon)}
+            />
+          ))}
+        </ul>
+        <PagingFooter
+          leftAction={() => {
+            updatePokemonList(page - 1);
+          }}
+          rightAction={() => {
+            updatePokemonList(page + 1);
+          }}
+        >
+          {page}
+        </PagingFooter>
       </main>
     </div>
   );
