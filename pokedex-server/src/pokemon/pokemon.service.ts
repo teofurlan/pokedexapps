@@ -10,10 +10,24 @@ const db = Datastore.create({
 
 @Injectable()
 export class PokemonService {
-  create(createPokemonDto: CreatePokemonDto) {
-    console.log(createPokemonDto);
-  }
+  create = async (
+    pokemon: CreatePokemonDto,
+  ): Promise<{ idWasOk: boolean; nameWasOk: boolean }> => {
+    const validation = await this.checkIfExits(pokemon);
+    if (!validation.id && !validation.name) {
+      db.insert(pokemon);
+      return { idWasOk: !validation.id, nameWasOk: !validation.name };
+    }
+    return { idWasOk: !validation.id, nameWasOk: !validation.name };
+  };
 
+  checkIfExits = async (
+    pokemon: CreatePokemonDto,
+  ): Promise<{ id: boolean; name: boolean }> => {
+    const idTest = await db.findOne({ id: pokemon.id });
+    const nameTest = await db.findOne({ name: pokemon.name });
+    return { id: idTest !== null, name: nameTest !== null };
+  };
   async getPagesAmount() {
     return Math.ceil((await db.find({})).length / 5);
   }

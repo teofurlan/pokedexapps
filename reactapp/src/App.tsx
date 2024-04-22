@@ -32,12 +32,7 @@ export default function App() {
     fetch(BASE_URL)
       .then((res) => res.json())
       .then((data) => setPageAmount(data));
-    fetch(`${BASE_URL}${page}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setList(data);
-      });
+    getPageFromServer(page);
   }, [page]);
 
   // Check if the value that is passed as parameter is between the range of pages, in which case updates the page useState
@@ -45,6 +40,14 @@ export default function App() {
     if (pageIndex > 0 && pageIndex <= pageAmount) {
       setPage(pageIndex);
     }
+  };
+
+  const getPageFromServer = (page: number) => {
+    fetch(`${BASE_URL}${page}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setList(data);
+      });
   };
 
   const addPokemon = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -76,6 +79,8 @@ export default function App() {
           setTagList([]);
           // Cleans the inputs' value
           form.reset();
+          // Updates the page
+          getPageFromServer(page);
         } else {
           // If the pokemon couldn't be added to the db, then checks if the cause was the id first
           if (!data.validation.idWasOk) {
@@ -86,6 +91,12 @@ export default function App() {
           }
         }
       });
+  };
+
+  // Deletes the passed pokemon and updates the page
+  const deletePokemon = async (pokemon: Pokemon) => {
+    fetch(`${BASE_URL}${pokemon.id}`, { method: "DELETE" });
+    getPageFromServer(page);
   };
 
   const clientSideValidation = (data: FormData): boolean => {
@@ -114,7 +125,7 @@ export default function App() {
   };
 
   const addTag = (tag: string): boolean => {
-    console.log("tag: ", tag);
+    tag = capitalizeFirstLetter(tag.toLocaleLowerCase());
     if (!getTypeColor(tag)) {
       setTypesError("This is not an existing pokemon's type");
     } else if (tagList.length === 2) {
@@ -212,6 +223,7 @@ export default function App() {
               key={pokemon.id}
               pokemon={pokemon}
               bgColor={getPokemonColor(pokemon as Pokemon)}
+              deletePokemon={deletePokemon}
             />
           ))}
         </ul>

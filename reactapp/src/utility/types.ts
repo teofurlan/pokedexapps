@@ -30,6 +30,7 @@ export const capitalizeFirstLetter = (text: string) => {
 };
 
 export const getTypeColor = (type: string) => {
+  type = capitalizeFirstLetter(type.toLocaleLowerCase());
   if (Object.prototype.hasOwnProperty.call(typesColors, type)) {
     return typesColors[type];
   }
@@ -39,12 +40,12 @@ export const getTypeColor = (type: string) => {
 export const getPokemonColor = (pokemon: Pokemon): object => {
   if (pokemon.types.length > 1) {
     return {
-      "backgroundImage": `linear-gradient(to right, ${getTypeColor(
+      backgroundImage: `linear-gradient(to right, ${getTypeColor(
         pokemon.types[0]
       )}, ${getTypeColor(pokemon.types[1])})`,
     };
   } else {
     // If the pokemon only has one type, then bgColor stores the tailwind class to set the bg of the li with that types color
-    return { "backgroundColor": `${getTypeColor(pokemon.types[0])}`};
+    return { backgroundColor: `${getTypeColor(pokemon.types[0])}` };
   }
 };
