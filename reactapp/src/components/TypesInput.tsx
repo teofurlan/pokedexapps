@@ -1,13 +1,31 @@
+import { useState } from "react";
 import { TypeTag } from "./TypeTag";
+import { typesColors } from "../utility/types";
+import { TypesSuggestions } from "./TypesSuggestions";
 
 export const TypesInput = ({
   holder = "",
   error = "",
+  handleTagAddition,
   addTag,
   deleteTag,
   clearError,
   typesTags = [],
 }) => {
+  const [suggestionList, setSuggestionList] = useState([]);
+  const [value, setValue] = useState<string>("");
+
+  const updateSuggestionsList = (event: React.FormEvent) => {
+    setSuggestionList(
+      Object.keys(typesColors).filter((type) =>
+        type
+          .toLocaleLowerCase()
+          .startsWith(
+            (event.target as HTMLInputElement).value.toLocaleLowerCase()
+          )
+      )
+    );
+  };
 
   return (
     // Render de error only if the errorText has some value
@@ -36,19 +54,35 @@ export const TypesInput = ({
         <input
           type="text"
           min="1"
-          name='types'
+          name="types"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
           placeholder={holder}
           className="my-1 w-full p-2 border border-gray-300 rounded-lg"
           onFocus={() => {
             clearError("types");
           }}
-          onKeyDown={addTag}
+          onKeyDown={(event) => {
+            if (handleTagAddition(event)) {
+              setSuggestionList([]);
+              setValue("");
+            }
+          }}
+          onInput={updateSuggestionsList}
         />
         {typesTags.map((type) => (
           <TypeTag key={type} deleteTag={deleteTag}>
             {type}
           </TypeTag>
         ))}
+        <TypesSuggestions
+          suggestions={suggestionList}
+          addTag={addTag}
+          clearValue={() => setValue("")}
+          clearSuggestionList={() => {
+            setSuggestionList([]);
+          }}
+        />
       </div>
     </>
   );

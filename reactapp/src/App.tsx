@@ -20,12 +20,11 @@ export default function App() {
   const [pageAmount, setPageAmount] = useState(1);
   const [page, setPage] = useState<number>(1);
   const [tagList, setTagList] = useState<Array<string>>([]);
+  // Use states for error messages
   const [idError, setIdError] = useState<string>("");
   const [nameError, setNameError] = useState<string>("");
   const [typesError, setTypesError] = useState<string>("");
-  // const [count, setCount] = useState(0)
-  // const pageCount = Math.ceil(count / 5)
-  // setPage(3)
+
   // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
 
   useEffect(() => {
@@ -106,28 +105,33 @@ export default function App() {
     return isCorrect;
   };
 
-  const addTag = (event: React.KeyboardEvent) => {
+  const handleTagAddition = (event: React.KeyboardEvent): boolean | void => {
     if (!(event.key === "Enter")) {
       return;
     }
-    event.preventDefault()
-    const type = capitalizeFirstLetter(
-      (event.target as HTMLInputElement).value
-    );
-    if (!getTypeColor(type)) {
+    event.preventDefault();
+    return addTag((event.target as HTMLInputElement).value);
+  };
+
+  const addTag = (tag: string): boolean => {
+    console.log("tag: ", tag);
+    if (!getTypeColor(tag)) {
       setTypesError("This is not an existing pokemon's type");
     } else if (tagList.length === 2) {
       setTypesError("A pokemon cannot have more than 2 types");
-    } else if (tagList.includes(type)) {
+    } else if (tagList.includes(tag)) {
       setTypesError("This type is already added!");
     } else {
-      setTagList([...tagList, (event.target as HTMLInputElement).value]);
-      (event.target as HTMLInputElement).value = ''
+      // Add the new task to the list
+      setTagList([...tagList, tag]);
+      // Clear any possible error for the types input
+      setTypesError("");
+      return true;
     }
+    return false;
   };
 
   const deleteTag = (tag: string) => {
-    console.log('Delete tag: '+ tagList)
     setTagList(tagList.filter((type) => type !== tag) as []);
   };
 
@@ -174,6 +178,7 @@ export default function App() {
           <TypesInput
             holder={"Write some type and press enter to add it"}
             error={typesError}
+            handleTagAddition={handleTagAddition}
             addTag={addTag}
             deleteTag={deleteTag}
             typesTags={tagList}
