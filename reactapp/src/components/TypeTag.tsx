@@ -16,6 +16,7 @@ export const TypeTag = ({ children, deleteTag }) => {
       <button
         className="flex items-center justify-center text-black size-[1.2rem]"
         onClick={handleDeletion}
+        tabIndex={-1}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
