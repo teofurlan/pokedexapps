@@ -1,23 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import Datastore from 'nedb-promises';
 
-export type User = any;
+const db = Datastore.create({
+  filename: 'src/database/users.db',
+  autoload: true,
+});
 
-@Injectable()
+export type User = {
+  id?: string;
+  email: string;
+  hash: string;
+};
+
 export class UsersService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
+  async create(user: User) {
+    return (await db.insert(user)) as User;
+  }
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
+  async findOne(email: string): Promise<User | null> {
+    return (await db.findOne({ email })) as User;
   }
 }
