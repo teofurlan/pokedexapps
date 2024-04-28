@@ -14,13 +14,13 @@ export class AuthService {
   async signup(dto: AuthDto) {
     try {
       // We check if the user exists in the database first
-      const existingUser = this.userService.findOne(dto.email);
+      const existingUser = await this.userService.findOne(dto.email);
       // If it does not exist, we insert it into the db
       if (!existingUser) {
         // Generates a hash for the user's password
         const hash = await argon.hash(dto.password);
         // Saves the user's email in the database and its respective hash
-        const user = this.userService.create({ email: dto.email, hash });
+        const user = await this.userService.create({ email: dto.email, hash });
         return user;
       }
       // If it does exits, then we throw and exception
@@ -40,7 +40,8 @@ export class AuthService {
     if (!passwordMatches) {
       throw new ForbiddenException('Credentials incorrect');
     }
-    return await this.signToken(user.id as string, user.email);
+    console.log({ user });
+    return await this.signToken(user._id as string, user.email);
   }
 
   async signToken(userId: string, email: string) {

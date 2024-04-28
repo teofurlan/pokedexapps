@@ -6,14 +6,14 @@ const db = Datastore.create({
 });
 
 export type User = {
-  id?: string;
+  _id?: string;
   email: string;
   hash: string;
 };
 
 export class UsersService {
   async create(user: User) {
-    return (await db.insert(user)) as User;
+    await db.insert(user);
   }
 
   async findOne(email: string): Promise<User | null> {

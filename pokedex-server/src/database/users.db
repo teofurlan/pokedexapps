@@ -1,1 +1,4 @@
-{"email":"teofurlan@email.com","password":"supersecreto","_id":"638w5G6Fzxem6qjW"}
+{"email":"teofurlan@email.com","hash":"$argon2id$v=19$m=65536,t=3,p=4$KwiO9cCIQLDzrwZ/Y47lcA$3aEyw6yFvKeeF6C6aiU3FOfUVVYei97pqXajXlIti6s","_id":"EctGyGsOAnYY0iut"}
+{"email":"aylem@email.com","hash":"$argon2id$v=19$m=65536,t=3,p=4$Ira9QMq7HbcxjI5iCIoSAQ$mqLWLLd5DrbwLFoM0xSiGovyZCf30Lmii+ER/pCvEbQ","_id":"EiA0QS1pagUWIt5i"}
+{"email":"someemail@email.com","hash":"$argon2id$v=19$m=65536,t=3,p=4$iNY5r9U3lpFJiU6smb3M0A$tlsVzSWvnUJE0nwR5YUsu8gFSXKhYx/O58PJuGRdpIY","_id":"NCFmcQtKoGFE0uLd"}
+{"email":"luna@email.com","hash":"$argon2id$v=19$m=65536,t=3,p=4$SLLMqdJvcr4HWE09QPjzHA$N6EnPZ24u6dwJm2oV1pkBliEqYgylVSbdGSqfpR2ADo","_id":"gwuUravuFfGjetHb"}

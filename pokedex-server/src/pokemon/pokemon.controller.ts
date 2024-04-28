@@ -7,10 +7,13 @@ import {
   Delete,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { PokemonService } from './pokemon.service';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
+import { JwtGuard } from 'src/auth/guard';
 
+@UseGuards(JwtGuard)
 @Controller('api/pokemon')
 export class PokemonController {
   constructor(private readonly pokemonService: PokemonService) {}
