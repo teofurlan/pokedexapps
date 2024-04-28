@@ -21,4 +21,4 @@ pnpm-debug.log*
 .DS_Store
 
 # others
-.vscode
+.vscode/settings.json
