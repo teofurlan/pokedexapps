@@ -4,7 +4,7 @@ import Datastore from 'nedb-promises';
 
 console.log(Datastore);
 const db = Datastore.create({
-  filename: 'src/pokemon/database/database.db',
+  filename: 'src/database/pokemon.db',
   autoload: true,
 });
 

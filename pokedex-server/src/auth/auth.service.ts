@@ -3,7 +3,7 @@ import Datastore from 'nedb-promises';
 
 console.log(Datastore);
 const usersDB = Datastore.create({
-  filename: 'src/pokemon/database/database.db',
+  filename: 'src/database/users.db',
   autoload: true,
 });
 
@@ -12,7 +12,9 @@ export class AuthService {
   constructor() {}
 
   async signup() {
-    return 'Your account was created successfully!';
+    try {
+      return
+    } catch (error) {}
   }
 
   async signin() {
