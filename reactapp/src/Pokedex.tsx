@@ -9,31 +9,58 @@ import {
   getPokemonColor,
   getTypeColor,
 } from "./utility/types";
+import { BASE_URL } from "./utility";
 import PagingFooter from "./components/PagingFooter";
 import { Input } from "./components/Input";
 import { TypesInput } from "./components/TypesInput";
-
-const BASE_URL = "http://localhost:4321/api/pokemon/";
+import Signin from "./Signin";
+import Cookies from "universal-cookie";
+import { InvalidTokenError, jwtDecode } from "jwt-decode";
 
 export default function Pokedex() {
+  const cookies = new Cookies();
+  // Use state to store and handle the authentication cookie
+  // const [authCookie, setAuthCookie] = useState(null);
+  const [token, setToken] = useState(null);
+  const [user, setUser] = useState<string | null>(null);
+  // Use state to store the list of pokemon corresponding to the page's number
   const [list, setList] = useState<Pokemon[]>([]);
+  // Use state to get the total amount of pages based on the amount of pokemon in the database
   const [pageAmount, setPageAmount] = useState(1);
+  // Stores the page in a use state too, so we can trigger functionality based on the modification of the page number
   const [page, setPage] = useState<number>(1);
+  // Stores the type tags when completing the form to add a new pokemon
   const [tagList, setTagList] = useState<Array<string>>([]);
-  // Use states for error messages
+  // Use states for error messages, had to made them individual cause' had trouble trying to put them all in a array useState
   const [idError, setIdError] = useState<string>("");
   const [nameError, setNameError] = useState<string>("");
   const [typesError, setTypesError] = useState<string>("");
 
-  // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
-
   useEffect(() => {
-    // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
-    fetch(BASE_URL)
-      .then((res) => res.json())
-      .then((data) => setPageAmount(data));
+    setToken(cookies.get("jwt_authorization"));
+  }, [user]);
+
+  // useEffect to check if there is any existing token (in a cookie of course) that we can use to validate the user, this way when the page is refreshed they don't have to sign in again
+  useEffect(() => {
+    checkAuth();
+    console.log(user);
+  }, [cookies]);
+
+  // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
+  useEffect(() => {
+    try {
+      fetch(`${BASE_URL}api/pokemon/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => setPageAmount(data));
+    } catch (error) {
+      console.log(error);
+    }
     getPageFromServer(page);
-  }, [page]);
+  }, [page, token]);
 
   // Check if the value that is passed as parameter is between the range of pages, in which case updates the page useState
   const updatePokemonList = (pageIndex: number) => {
@@ -42,12 +69,51 @@ export default function Pokedex() {
     }
   };
 
+  const checkAuth = async () => {
+    try {
+      // Checks if there is any jwt in the cookies
+      const cookieToken = cookies.get("jwt_authorization");
+      // Immediately set isLogged to false if there is no token
+      if (!cookieToken) {
+        // Set the state of the user as logged
+        setUser(null);
+        setToken(cookieToken);
+        return;
+      }
+      // If there is a token, then tries to validate it in the backend
+      try {
+        fetch(`${BASE_URL}auth/validate`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((user) => {
+            setUser(user.email);
+            setToken(cookieToken);
+          });
+      } catch (error) {
+        throw new InvalidTokenError("This token is either invalid or expired");
+      }
+    } catch (error) {
+      setUser(null);
+    }
+  };
+
   const getPageFromServer = (page: number) => {
-    fetch(`${BASE_URL}${page}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setList(data);
-      });
+    try {
+      fetch(`${BASE_URL}api/pokemon/${page}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setList(data);
+        });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const addPokemon = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -64,11 +130,12 @@ export default function Pokedex() {
       types: tagList,
     };
 
-    fetch(BASE_URL, {
+    fetch(`${BASE_URL}api/pokemon`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         "Access-Control-Allow-Origin": "*",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(pokemon),
     })
@@ -95,7 +162,10 @@ export default function Pokedex() {
 
   // Deletes the passed pokemon and updates the page
   const deletePokemon = async (pokemon: Pokemon) => {
-    fetch(`${BASE_URL}${pokemon.id}`, { method: "DELETE" });
+    fetch(`${BASE_URL}api/pokemon/${pokemon.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     getPageFromServer(page);
   };
 
@@ -148,6 +218,7 @@ export default function Pokedex() {
 
   return (
     <div>
+      {user ? <></> : <Signin setUser={setUser} />}
       <header className="h-60 flex justify-center items-center bg-black bg-opacity-80">
         <h1 className="flex text-9xl text-yellow-400 font-extrabold bot z-40 drop-shadow-2xl">
           P
@@ -218,14 +289,16 @@ export default function Pokedex() {
               Delete
             </span>
           </li>
-          {list.map((pokemon) => (
-            <PokemonLi
-              key={pokemon.id}
-              pokemon={pokemon}
-              bgColor={getPokemonColor(pokemon as Pokemon)}
-              deletePokemon={deletePokemon}
-            />
-          ))}
+          {list.length > 0
+            ? list.map((pokemon) => (
+                <PokemonLi
+                  key={pokemon.id}
+                  pokemon={pokemon}
+                  bgColor={getPokemonColor(pokemon as Pokemon)}
+                  deletePokemon={deletePokemon}
+                />
+              ))
+            : ""}
         </ul>
         <PagingFooter
           leftAction={() => {
