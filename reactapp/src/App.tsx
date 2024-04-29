@@ -5,7 +5,7 @@ type Pokemon = {
   name: string
 }
 
-const BASE_URL = 'http://localhost:4321/api'
+const BASE_URL = 'http://localhost:3000'
 
 export default function App() {
   const [list, setList] = useState<Pokemon[]>([])
@@ -15,7 +15,7 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false
-    fetch(`${BASE_URL}/pokemon.json?page=${page}`)
+    fetch(`${BASE_URL}/pokemon?page=${page}`)
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled) {
@@ -39,7 +39,7 @@ export default function App() {
       name: data.get('name') as string
     }
 
-    await fetch(`${BASE_URL}/pokemon.json`, {
+    await fetch(`${BASE_URL}/pokemon`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ export default function App() {
   }
 
   async function deletePokemon(id: number) {
-    await fetch(`${BASE_URL}/pokemon/${id}.json`, {
+    await fetch(`${BASE_URL}/pokemon/${id}`, {
       method: 'DELETE'
     })
 

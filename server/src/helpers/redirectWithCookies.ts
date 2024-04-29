@@ -8,7 +8,7 @@ export function redirectWithCookies(location: string, cookies: CookieData[]) {
   headers.append('Location', location)
 
   for (const cookie of cookies) {
-    headers.append('Set-Cookie', `${cookie.name}=${cookie.value}; SameSite=Strict; Path=/; Max-Age=${cookie.maxAge}`)
+    headers.append('Set-Cookie', `${cookie.name}=${cookie.value}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${cookie.maxAge}`)
   }
 
   return new Response(null, {
