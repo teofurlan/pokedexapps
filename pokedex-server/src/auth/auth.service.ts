@@ -49,7 +49,7 @@ export class AuthService {
       usb: userId,
       email,
     };
-    const secret = 'The North remembers';
+    const secret = 'The-North-remembers';
     return {
       access_token: await this.jwt.signAsync(payload, {
         expiresIn: '15m',
