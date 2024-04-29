@@ -52,7 +52,7 @@ export class AuthService {
     const secret = 'The-North-remembers';
     return {
       access_token: await this.jwt.signAsync(payload, {
-        expiresIn: '15m',
+        expiresIn: '1m',
         secret,
       }),
     };
