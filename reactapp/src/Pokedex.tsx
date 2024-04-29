@@ -36,8 +36,15 @@ export default function Pokedex() {
   const [nameError, setNameError] = useState<string>("");
   const [typesError, setTypesError] = useState<string>("");
 
+
   useEffect(() => {
     setToken(cookies.get("jwt_authorization"));
+    if (!user) {
+      document.body.classList.add('overflow-hidden')
+    } else {
+      document.body.classList.remove('overflow-hidden')
+
+    }
   }, [user]);
 
   // useEffect to check if there is any existing token (in a cookie of course) that we can use to validate the user, this way when the page is refreshed they don't have to sign in again
