@@ -272,7 +272,7 @@ export default function Pokedex() {
   return (
     <div>
       {user ? <></> : <AuthenticationComponent />}
-      <header className="relative h-40 flex justify-center items-center bg-black bg-opacity-80">
+      <header className="relative h-40 flex justify-center items-center bg-black bg-opacity-70">
         <h1 className="flex text-8xl text-yellow-400 font-extrabold bot z-40 drop-shadow-2xl">
           P
           <span className="text-7xl flex flex-col justify-end text-red-600">
@@ -309,7 +309,7 @@ export default function Pokedex() {
           </svg>
         </button>
       </header>
-      <main className="container min-w-full px-20 pt-10 flex flex-col pb-20 bg-black bg-opacity-50">
+      <main className="container min-w-full px-20 pt-10 flex flex-col pb-20 ">
         <h2 className="text-4xl text-yellow-400 drop-shadow-xl font-bold mb-3">
           Add a new pokemon
         </h2>
