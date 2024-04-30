@@ -13,7 +13,10 @@ export type User = {
 
 export class UsersService {
   async create(user: User) {
-    await db.insert(user);
+    const newUser = await db.insert(user);
+    delete newUser.hash;
+    delete newUser._id;
+    return newUser;
   }
 
   async findOne(email: string): Promise<User | null> {
