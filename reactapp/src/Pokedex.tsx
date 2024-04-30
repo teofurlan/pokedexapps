@@ -9,7 +9,7 @@ import {
   getPokemonColor,
   getTypeColor,
 } from "./utility/types";
-import { BASE_URL } from "./utility";
+import { BASE_URL, fireAlert } from "./utility";
 import PagingFooter from "./components/PagingFooter";
 import { Input } from "./components/Input";
 import { TypesInput } from "./components/TypesInput";
@@ -18,11 +18,13 @@ import Cookies from "universal-cookie";
 import { InvalidTokenError, jwtDecode } from "jwt-decode";
 
 export default function Pokedex() {
+  // Initialize cookies manager
   const cookies = new Cookies();
-  // Use state to store and handle the authentication cookie
-  // const [authCookie, setAuthCookie] = useState(null);
+  // Stores the token to validate the user when the page is refreshed so he/she does not have to log in again
   const [token, setToken] = useState(null);
-  const [user, setUser] = useState<string | null>(null);
+  // Stores the current user, it's initialized with a default value so the signin modal is not automatically displayed when refreshing and then deleted if a valid user's token is found (this causes flickering)
+  const [user, setUser] = useState<string | null>("someone");
+  const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
   // Use state to store the list of pokemon corresponding to the page's number
   const [list, setList] = useState<Pokemon[]>([]);
   // Use state to get the total amount of pages based on the amount of pokemon in the database
@@ -36,22 +38,26 @@ export default function Pokedex() {
   const [nameError, setNameError] = useState<string>("");
   const [typesError, setTypesError] = useState<string>("");
 
-
   useEffect(() => {
     setToken(cookies.get("jwt_authorization"));
     if (!user) {
-      document.body.classList.add('overflow-hidden')
+      document.body.classList.add("overflow-hidden");
     } else {
-      document.body.classList.remove('overflow-hidden')
-
+      document.body.classList.remove("overflow-hidden");
     }
-  }, [user]);
+  }, [cookies]);
 
   // useEffect to check if there is any existing token (in a cookie of course) that we can use to validate the user, this way when the page is refreshed they don't have to sign in again
   useEffect(() => {
-    checkAuth();
-    console.log(user);
-  }, [cookies]);
+    if (cookies) {
+      checkAuth();
+    }
+    if (!user) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [token]);
 
   // Fetch to the server's non-params GET method to get the amount of pages and stores then in the pageAmount's useEffect
   useEffect(() => {
@@ -63,8 +69,8 @@ export default function Pokedex() {
       })
         .then((res) => res.json())
         .then((data) => setPageAmount(data));
-    } catch (error) {
-      console.log(error);
+    } catch {
+      return;
     }
     getPageFromServer(page);
   }, [page, token]);
@@ -82,9 +88,12 @@ export default function Pokedex() {
       const cookieToken = cookies.get("jwt_authorization");
       // Immediately set isLogged to false if there is no token
       if (!cookieToken) {
-        // Set the state of the user as logged
+        // Fire a message indicating that the session has expired only if there is an actual user. This means that the message only will be shown if there was a user logged but the session expired.
+        if (user) {
+          fireAlert("Your session has expired!", "error");
+        }
         setUser(null);
-        setToken(cookieToken);
+        // setToken(cookieToken);
         return;
       }
       // If there is a token, then tries to validate it in the backend
@@ -96,19 +105,19 @@ export default function Pokedex() {
         })
           .then((res) => res.json())
           .then((user) => {
-            setUser(user.email);
+            if (user.email) setUser(user.email);
             setToken(cookieToken);
+            fireAlert(`Logged as ${user.email}`);
           });
-      } catch (error) {
-        throw new InvalidTokenError("This token is either invalid or expired");
+      } catch {
+        throw new Error();
       }
-    } catch (error) {
+    } catch {
       setUser(null);
     }
   };
 
   const getPageFromServer = (page: number) => {
-    try {
       fetch(`${BASE_URL}api/pokemon/${page}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -118,9 +127,6 @@ export default function Pokedex() {
         .then((data) => {
           setList(data);
         });
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const addPokemon = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -223,10 +229,50 @@ export default function Pokedex() {
     setTagList(tagList.filter((type) => type !== tag) as []);
   };
 
+  const changeMode = () => {
+    setIsLoginMode(!isLoginMode);
+  };
+
+  const AuthenticationComponent = () => {
+    if (isLoginMode) {
+      return (
+        <Signin
+          setUser={setUser}
+          url={`${BASE_URL}auth/signin`}
+          mode={isLoginMode}
+          changeMode={changeMode}
+          textContents={{
+            title: "Welcome back!",
+            link: "Register",
+            footer: "Don't have an account? ",
+            button: "Sign In",
+            error: "Wrong email or password",
+          }}
+        />
+      );
+    } else {
+      return (
+        <Signin
+          setUser={setUser}
+          url={`${BASE_URL}auth/signup`}
+          mode={isLoginMode}
+          changeMode={changeMode}
+          textContents={{
+            title: "Welcome to the pokedex!",
+            link: "Sign in",
+            footer: "Already have an account? ",
+            button: "Register",
+            error: "This email is already in use",
+          }}
+        />
+      );
+    }
+  };
+
   return (
     <div>
-      {user ? <></> : <Signin setUser={setUser} />}
-      <header className="h-60 flex justify-center items-center bg-black bg-opacity-80">
+      {user ? <></> : <AuthenticationComponent />}
+      <header className="h-48 flex justify-center items-center bg-black bg-opacity-80">
         <h1 className="flex text-9xl text-yellow-400 font-extrabold bot z-40 drop-shadow-2xl">
           P
           <span className="text-8xl flex flex-col justify-end text-red-600">
