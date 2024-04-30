@@ -9,3 +9,7 @@ body {
     font-style: normal;
     background: url('./pokedex.jpg');
 }
+
+#form {
+    background: repeating-linear-gradient(-45deg,#fff 0 18px,#f3f3f3 0 40px);
+}
