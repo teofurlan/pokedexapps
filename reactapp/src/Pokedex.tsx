@@ -118,15 +118,15 @@ export default function Pokedex() {
   };
 
   const getPageFromServer = (page: number) => {
-      fetch(`${BASE_URL}api/pokemon/${page}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setList(data);
-        });
+    fetch(`${BASE_URL}api/pokemon/${page}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setList(data);
+      });
   };
 
   const addPokemon = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -272,10 +272,10 @@ export default function Pokedex() {
   return (
     <div>
       {user ? <></> : <AuthenticationComponent />}
-      <header className="h-48 flex justify-center items-center bg-black bg-opacity-80">
-        <h1 className="flex text-9xl text-yellow-400 font-extrabold bot z-40 drop-shadow-2xl">
+      <header className="relative h-40 flex justify-center items-center bg-black bg-opacity-80">
+        <h1 className="flex text-8xl text-yellow-400 font-extrabold bot z-40 drop-shadow-2xl">
           P
-          <span className="text-8xl flex flex-col justify-end text-red-600">
+          <span className="text-7xl flex flex-col justify-end text-red-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1em"
@@ -290,6 +290,24 @@ export default function Pokedex() {
           </span>
           kedex
         </h1>
+        <button className="text-4xl absolute right-5 bottom-3 hover:scale-105" onClick={() => setUser(null)}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+          >
+            <g
+              fill="none"
+              stroke="#d1d1d1"
+              stroke-linecap="round"
+              stroke-width="1.5"
+            >
+              <path stroke-linejoin="round" d="M10 12h10m0 0l-3-3m3 3l-3 3" />
+              <path d="M4 12a8 8 0 0 1 8-8m0 16a7.985 7.985 0 0 1-6.245-3" />
+            </g>
+          </svg>
+        </button>
       </header>
       <main className="container min-w-full px-20 pt-10 flex flex-col pb-20 bg-black bg-opacity-50">
         <h2 className="text-4xl text-yellow-400 drop-shadow-xl font-bold mb-3">
